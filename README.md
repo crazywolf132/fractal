@@ -30,6 +30,7 @@ The Fractal system consists of four main packages:
 - **Package-aware naming** - Automatic naming based on package.json context
 
 ### For Component Consumers  
+- **Zero setup** - Automatic initialization and registry detection
 - **Runtime loading** - Dynamic component loading with caching and error handling
 - **Type safety** - Full TypeScript support
 - **Dependency tracking** - Automatic resolution of internal fractal dependencies
@@ -167,16 +168,25 @@ function MyApp() {
 }
 ```
 
-### Setup Fractal Registry
+### Setup (Optional)
+
+**Zero Setup Required!** Fractals work automatically with smart defaults.
+
+For advanced configuration:
 ```tsx
-// In your app's entry point or _app.tsx
+// Optional: Explicit setup in your app's entry point
 import { setupFractals } from '@fractal/core';
 
 setupFractals({
   registryUrl: 'http://localhost:3001',
-  // Optional: preload specific fractals
-  preload: ['my-package::my-button::1.0.0']
+  preload: ['my-package::my-button::1.0.0'],
+  modules: { 'custom-lib': customLibrary }
 });
+```
+
+Or use environment variables:
+```bash
+NEXT_PUBLIC_FRACTAL_REGISTRY_URL=http://localhost:3001
 ```
 
 ## 📊 Fractal Manifests
