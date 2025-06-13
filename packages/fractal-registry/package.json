@@ -1,0 +1,31 @@
+{
+  "name": "@fractal/registry",
+  "version": "0.1.0",
+  "description": "Registry API for serving fractal components",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "clean": "rimraf dist node_modules fractal-storage",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@babel/core": "^7.27.4",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "cors": "^2.8.5",
+    "esbuild": "^0.25.5",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/node": "^24.0.1",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.2",
+    "typescript": "^5.8.3"
+  }
+}

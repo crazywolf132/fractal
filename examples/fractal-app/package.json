@@ -1,0 +1,26 @@
+{
+  "name": "fractal-demo-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "clean": "rimraf .next node_modules",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@fractal/core": "workspace:*",
+    "@fractal/plugin": "workspace:*",
+    "next": "^15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}
