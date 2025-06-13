@@ -22,23 +22,15 @@ export interface BuildResult {
 }
 
 export class FractalBuilder {
-  private detector: FractalDetector;
-  private transformer: FractalTransformer;
-  private packageFinder: PackageFinder;
-  private manifestGenerator: ManifestGenerator;
-
-  constructor() {
-    this.detector = new FractalDetector();
-    this.transformer = new FractalTransformer();
-    this.packageFinder = new PackageFinder();
-    this.manifestGenerator = new ManifestGenerator();
-  }
+  private detector = new FractalDetector();
+  private transformer = new FractalTransformer();
+  private packageFinder = new PackageFinder();
+  private manifestGenerator = new ManifestGenerator();
 
   async build(options: BuildOptions): Promise<BuildResult[]> {
     const searchDir = options.input || process.cwd();
     console.log(chalk.blue(`Building fractals from ${searchDir}...`));
 
-    // Find all fractal components
     const fractals = await this.detector.findFractals(searchDir);
     
     if (fractals.length === 0) {
@@ -47,48 +39,83 @@ export class FractalBuilder {
     }
 
     console.log(chalk.green(`Found ${fractals.length} fractal components`));
-
-    // Ensure output directory exists
     await fs.mkdir(options.output, { recursive: true });
 
-    // Build each fractal with esbuild
-    const results: BuildResult[] = [];
-    for (const fractal of fractals) {
-      const result = await this.buildFractal(fractal, options);
-      if (result) {
-        results.push(result);
-      }
+    const results = await Promise.allSettled(
+      fractals.map(fractal => this.buildFractal(fractal, options))
+    );
+
+    const successful = results
+      .filter((result): result is PromiseFulfilledResult<BuildResult> => 
+        result.status === 'fulfilled' && result.value !== null
+      )
+      .map(result => result.value);
+
+    const failed = results.filter(result => result.status === 'rejected').length;
+
+    if (failed > 0) {
+      console.log(chalk.yellow(`⚠️  ${failed} fractal(s) failed to build`));
     }
 
     console.log(chalk.green('✨ Build complete!'));
-    return results;
+    return successful;
   }
 
   private async buildFractal(fractal: FractalInfo, options: BuildOptions): Promise<BuildResult | null> {
     try {
-      // Find the closest package.json
-      const packageInfo = await this.packageFinder.findClosestPackage(fractal.filePath);
-      
-      if (!packageInfo) {
-        console.log(chalk.yellow(`  ⚠ No package.json found for ${fractal.fileName}, skipping...`));
-        return null;
-      }
+      const packageInfo = await this.findPackageInfo(fractal);
+      if (!packageInfo) return null;
 
-      // Generate fractal name using package info
       const fractalName = this.packageFinder.generateFractalName(packageInfo, fractal.fileName);
-      const safeFileName = fractalName.replace(/::/g, '_').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const safeFileName = this.createSafeFileName(fractalName);
       const outputPath = path.join(options.output, `${safeFileName}.js`);
 
-      // Transform the fractal component
-      const transformed = await this.transformer.transform(fractal.filePath, fractalName);
-      
-      // Create a temporary file with the transformed content
-      const tempFile = path.join(options.output, `.temp-${safeFileName}.js`);
-      await fs.writeFile(tempFile, transformed);
+      const buildConfig = await this.prepareBuild(fractal, fractalName, options.output, safeFileName);
+      const buildResult = await this.executeBuild(buildConfig, outputPath);
+      const manifestPath = await this.generateArtifacts(fractalName, fractal, packageInfo, options.output, safeFileName, buildResult);
 
-      // Build with esbuild
-      const result = await esbuild.build({
-        entryPoints: [tempFile],
+      console.log(chalk.gray(`  ✓ Built ${fractalName}`));
+      
+      return {
+        name: fractalName,
+        filePath: fractal.filePath,
+        outputPath,
+        manifestPath,
+        metadata: buildResult.metadata,
+      };
+    } catch (error) {
+      console.error(chalk.red(`  ✗ Failed to build ${fractal.fileName}:`), error);
+      return null;
+    }
+  }
+
+  private async findPackageInfo(fractal: FractalInfo): Promise<PackageInfo | null> {
+    const packageInfo = await this.packageFinder.findClosestPackage(fractal.filePath);
+    
+    if (!packageInfo) {
+      console.log(chalk.yellow(`  ⚠ No package.json found for ${fractal.fileName}, skipping...`));
+    }
+    
+    return packageInfo;
+  }
+
+  private createSafeFileName(fractalName: string): string {
+    return fractalName.replace(/::/g, '_').replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  private async prepareBuild(fractal: FractalInfo, fractalName: string, outputDir: string, safeFileName: string): Promise<{ tempFile: string }> {
+    const transformed = await this.transformer.transform(fractal.filePath, fractalName);
+    const tempFile = path.join(outputDir, `.temp-${safeFileName}.js`);
+    
+    await fs.writeFile(tempFile, transformed);
+    
+    return { tempFile };
+  }
+
+  private async executeBuild(buildConfig: { tempFile: string }, outputPath: string): Promise<{ metadata: any }> {
+    try {
+      const buildResult = await esbuild.build({
+        entryPoints: [buildConfig.tempFile],
         bundle: true,
         format: 'esm',
         platform: 'browser',
@@ -104,44 +131,46 @@ export class FractalBuilder {
         },
       });
 
-      // Clean up temp file
-      await fs.unlink(tempFile);
-
-      // Generate manifest
-      const manifestPath = await this.manifestGenerator.generateManifest(
-        fractalName,
-        fractal.filePath,
-        packageInfo,
-        options.output
-      );
-
-      // Write metadata
-      const metadataPath = path.join(options.output, `${safeFileName}.meta.json`);
-      const metadata = {
-        name: fractalName,
-        originalPath: fractal.filePath,
-        packageName: packageInfo.name,
-        packageVersion: packageInfo.version,
-        packagePath: packageInfo.path,
-        outputSize: result.metafile?.outputs[outputPath]?.bytes || 0,
-        buildTime: new Date().toISOString(),
-        manifestPath,
-      };
-      await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-
-      console.log(chalk.gray(`  ✓ Built ${fractalName}`));
-      
       return {
-        name: fractalName,
-        filePath: fractal.filePath,
-        outputPath,
-        manifestPath,
-        metadata,
+        metadata: {
+          outputSize: buildResult.metafile?.outputs[outputPath]?.bytes || 0,
+          buildTime: new Date().toISOString(),
+        }
       };
-    } catch (error) {
-      console.error(chalk.red(`  ✗ Failed to build ${fractal.fileName}:`), error);
-      return null;
+    } finally {
+      await fs.unlink(buildConfig.tempFile).catch(() => {});
     }
+  }
+
+  private async generateArtifacts(
+    fractalName: string, 
+    fractal: FractalInfo, 
+    packageInfo: PackageInfo, 
+    outputDir: string, 
+    safeFileName: string,
+    buildResult: { metadata: any }
+  ): Promise<string> {
+    const manifestPath = await this.manifestGenerator.generateManifest(
+      fractalName,
+      fractal.filePath,
+      packageInfo,
+      outputDir
+    );
+
+    const metadata = {
+      name: fractalName,
+      originalPath: fractal.filePath,
+      packageName: packageInfo.name,
+      packageVersion: packageInfo.version,
+      packagePath: packageInfo.path,
+      manifestPath,
+      ...buildResult.metadata,
+    };
+
+    const metadataPath = path.join(outputDir, `${safeFileName}.meta.json`);
+    await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+
+    return manifestPath;
   }
 
   async watch(options: BuildOptions): Promise<void> {

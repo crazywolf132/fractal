@@ -1,4 +1,4 @@
-# Fractal - Module Federation System for React Components
+# Fractal
 
 Fractal is a powerful module federation system that enables sharing and dynamic loading of React components across applications. It provides a complete ecosystem for building, distributing, and consuming modular React components with rich metadata and dependency tracking.
 
@@ -29,7 +29,7 @@ The Fractal system consists of four main packages:
 - **Rich metadata** - Automatic generation of manifests with git info, dependencies, and more
 - **Package-aware naming** - Automatic naming based on package.json context
 
-### For Component Consumers  
+### For Component Consumers
 - **Zero setup** - Automatic initialization and registry detection
 - **Runtime loading** - Dynamic component loading with caching and error handling
 - **Type safety** - Full TypeScript support
@@ -63,7 +63,7 @@ pnpm dev
 
 This starts:
 - **Registry** on http://localhost:3001 - Serves fractal components
-- **Demo App** on http://localhost:3000 - Example Next.js application  
+- **Demo App** on http://localhost:3000 - Example Next.js application
 - **CLI** in watch mode - Monitors for package changes
 - **Core** in watch mode - Runtime library development
 
@@ -97,7 +97,7 @@ interface ButtonProps {
 
 export default function MyButton({ children, onClick, variant = 'primary' }: ButtonProps) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`btn btn-${variant}`}
       style={{
@@ -145,11 +145,11 @@ function MyApp() {
   return (
     <div>
       <h1>My Application</h1>
-      
+
       {/* Load a fractal component */}
-      <Fractal 
+      <Fractal
         id="my-package::my-button::1.0.0"
-        props={{ 
+        props={{
           children: "Click me!",
           onClick: () => alert('Fractal clicked!'),
           variant: "primary"
@@ -157,9 +157,9 @@ function MyApp() {
         loading={<div>Loading button...</div>}
         error={<div>Failed to load button</div>}
       />
-      
+
       {/* Load multiple fractals */}
-      <Fractal 
+      <Fractal
         id="ui-lib::card::2.1.0"
         props={{ title: "Hello", content: "This is a card fractal" }}
       />
@@ -196,7 +196,7 @@ Each fractal generates a comprehensive manifest with:
 ```json
 {
   "name": "my-package::my-button::1.0.0",
-  "version": "1.0.0", 
+  "version": "1.0.0",
   "generationDate": "2025-06-13T10:30:00.000Z",
   "dependencies": {
     "production": { "react": "^18.0.0" },
@@ -206,7 +206,7 @@ Each fractal generates a comprehensive manifest with:
   "internalFractals": ["my-package::icon::1.0.0"],
   "repository": {
     "url": "https://github.com/user/my-project",
-    "branch": "main", 
+    "branch": "main",
     "commit": "abc123...",
     "dirty": false
   },
@@ -217,7 +217,7 @@ Each fractal generates a comprehensive manifest with:
   },
   "source": {
     "filePath": "/absolute/path/to/MyButton.tsx",
-    "relativePath": "components/MyButton.tsx"  
+    "relativePath": "components/MyButton.tsx"
   }
 }
 ```
@@ -230,7 +230,7 @@ my-app/
 ├── package.json              # Contains name and version for fractal naming
 ├── components/
 │   ├── Button.tsx            # "use fractal" component
-│   ├── Card.tsx              # "use fractal" component  
+│   ├── Card.tsx              # "use fractal" component
 │   └── Icon.tsx              # Regular component (no directive)
 └── dist/fractals/            # Built fractals output
     ├── my-app-button-1-0-0.js
@@ -244,12 +244,12 @@ my-app/
 # Build fractals once
 pnpm build:fractals
 
-# Watch and rebuild on changes  
+# Watch and rebuild on changes
 pnpm watch:fractals
 
 # Start development environment
 pnpm dev              # All services
-pnpm dev:registry     # Registry only  
+pnpm dev:registry     # Registry only
 pnpm dev:app          # Demo app only
 pnpm dev:cli          # CLI in watch mode
 ```
@@ -285,7 +285,7 @@ GET /fractals/{id}
 ```
 Returns fractal metadata including code URL and manifest URL.
 
-#### Get Fractal Code  
+#### Get Fractal Code
 ```http
 GET /fractals/{id}/code
 ```
@@ -293,7 +293,7 @@ Returns executable JavaScript code for the fractal.
 
 #### Get Fractal Manifest
 ```http
-GET /fractals/{id}/manifest  
+GET /fractals/{id}/manifest
 ```
 Returns the complete manifest with dependencies and metadata.
 
@@ -318,7 +318,7 @@ GET /health
 Check out the [demo app](./examples/fractal-app) for complete examples:
 
 - **Button Component** - Basic fractal with props and styling
-- **Card Component** - Fractal with complex layout and multiple props  
+- **Card Component** - Fractal with complex layout and multiple props
 - **Navigation Component** - Fractal that uses other fractals internally
 - **Styled Card** - Fractal with CSS-in-JS styling
 
@@ -333,7 +333,7 @@ Visit the demo pages:
 # Clean all build artifacts
 pnpm clean
 
-# Clean and reinstall dependencies  
+# Clean and reinstall dependencies
 pnpm clean && pnpm install
 
 # Run tests (when available)
