@@ -1,25 +1,26 @@
-import express from 'express';
-import type { Express } from 'express';
-import cors from 'cors';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { serve } from '@hono/node-server';
 import { fractalRouter } from './routes/fractals';
 import { FractalStore } from './store';
 
-const app: Express = express();
-const port = process.env.PORT || 3001;
+const app = new Hono();
+const port = Number(process.env.PORT) || 3001;
 
 export const fractalStore = new FractalStore();
 
-app.use(cors());
-app.use(express.json());
-app.use('/fractals', fractalRouter);
+app.use('*', cors());
+app.route('/fractals', fractalRouter);
 
-app.get('/health', (_, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', (c) => {
+  return c.json({ status: 'ok' });
 });
 
 if (require.main === module) {
-  app.listen(port, () => {
-    console.log(`Registry: http://localhost:${port}`);
+  console.log(`Registry: http://localhost:${port}`);
+  serve({
+    fetch: app.fetch,
+    port,
   });
 }
 

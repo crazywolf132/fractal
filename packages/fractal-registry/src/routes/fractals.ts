@@ -1,28 +1,31 @@
-import { Router } from 'express';
-import type { Router as RouterType } from 'express';
+import { Hono } from 'hono';
 import { fractalStore } from '../server';
 
-export const fractalRouter: RouterType = Router();
+export const fractalRouter = new Hono();
 
-fractalRouter.get('/:id', async (req, res) => {
-  const fractal = await fractalStore.getFractal(req.params.id);
+fractalRouter.get('/:id', async (c) => {
+  const id = c.req.param('id');
+  const fractal = await fractalStore.getFractal(id);
   
   if (!fractal) {
-    return res.status(404).json({ error: 'Not found' });
+    return c.json({ error: 'Not found' }, 404);
   }
 
-  const { protocol, host } = req;
-  res.json({
-    url: `${protocol}://${host}/fractals/${req.params.id}/code`,
-    styles: fractal.styles
+  const url = new URL(c.req.url);
+  return c.json({
+    url: `${url.protocol}//${url.host}/fractals/${id}/code`,
+    manifestUrl: `${url.protocol}//${url.host}/fractals/${id}/manifest`,
+    styles: fractal.styles,
+    hasManifest: !!fractal.manifest
   });
 });
 
-fractalRouter.get('/:id/code', async (req, res) => {
-  const fractal = await fractalStore.getFractal(req.params.id);
+fractalRouter.get('/:id/code', async (c) => {
+  const id = c.req.param('id');
+  const fractal = await fractalStore.getFractal(id);
   
   if (!fractal) {
-    return res.status(404).send('');
+    return c.text('', 404);
   }
 
   const code = `(function() {
@@ -38,16 +41,39 @@ fractalRouter.get('/:id/code', async (req, res) => {
     return module.exports;
   })()`;
 
-  res.type('application/javascript').send(code);
+  return c.text(code, 200, {
+    'Content-Type': 'application/javascript'
+  });
 });
 
-fractalRouter.post('/:id', async (req, res) => {
-  const { source } = req.body;
+fractalRouter.get('/:id/manifest', async (c) => {
+  const id = c.req.param('id');
+  const fractal = await fractalStore.getFractal(id);
   
-  if (!source) {
-    return res.status(400).json({ error: 'Source required' });
+  if (!fractal) {
+    return c.json({ error: 'Not found' }, 404);
   }
 
-  const fractal = await fractalStore.addFractal(req.params.id, source);
-  res.json({ id: fractal.id, createdAt: fractal.createdAt });
+  if (!fractal.manifest) {
+    return c.json({ error: 'Manifest not available' }, 404);
+  }
+
+  return c.json(fractal.manifest);
+});
+
+fractalRouter.post('/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const { source, manifest } = body;
+  
+  if (!source) {
+    return c.json({ error: 'Source required' }, 400);
+  }
+
+  const fractal = await fractalStore.addFractal(id, source, manifest);
+  return c.json({ 
+    id: fractal.id, 
+    createdAt: fractal.createdAt,
+    hasManifest: !!fractal.manifest
+  });
 });

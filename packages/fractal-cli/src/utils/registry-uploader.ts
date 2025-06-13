@@ -12,31 +12,35 @@ export async function uploadToRegistry(outputDir: string, registryUrl: string): 
       const name = path.basename(fractalFile, '.js');
       const jsPath = path.join(outputDir, fractalFile);
       const metaPath = path.join(outputDir, `${name}.meta.json`);
+      const manifestPath = path.join(outputDir, `${name}.manifest.json`);
 
       // Read files
-      const [code, metadata] = await Promise.all([
+      const [code, metadata, manifest] = await Promise.all([
         fs.readFile(jsPath, 'utf-8'),
         fs.readFile(metaPath, 'utf-8').then(JSON.parse).catch(() => ({})),
+        fs.readFile(manifestPath, 'utf-8').then(JSON.parse).catch(() => null),
       ]);
 
+      // Extract the fractal name from metadata for the registry ID
+      const fractalId = metadata.name || name;
+
       // Upload to registry
-      const response = await fetch(`${registryUrl}/api/fractals`, {
+      const response = await fetch(`${registryUrl}/fractals/${encodeURIComponent(fractalId)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name,
-          code,
-          metadata,
+          source: code,
+          manifest,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to upload ${name}: ${response.statusText}`);
+        throw new Error(`Failed to upload ${fractalId}: ${response.statusText}`);
       }
 
-      console.log(chalk.gray(`  ✓ Uploaded ${name}`));
+      console.log(chalk.gray(`  ✓ Uploaded ${fractalId}`));
     }
 
     console.log(chalk.green('✨ All fractals uploaded successfully!'));
