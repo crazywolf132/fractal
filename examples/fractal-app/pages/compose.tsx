@@ -75,6 +75,30 @@ export default function ComposeDemoPage() {
           <Fractal id="button-fractal" props={{ text: "Tertiary", onClick: () => alert('Tertiary!') }} />
         </div>
       </Section>
+      
+      <Section title="6. Nested Fractals Demo" description="A fractal that loads other fractals inside it">
+        <div className="demo-box">
+          <Fractal 
+            id="nested-demo-fractal" 
+            props={{ 
+              title: "Fractal Composition Demo"
+            }}
+            fallback={<div style={{ padding: '40px', textAlign: 'center' }}>Loading nested fractal container...</div>}
+          />
+        </div>
+      </Section>
+      
+      <Section title="7. Parent-Child Fractals" description="Advanced fractal orchestration with state management">
+        <div className="demo-box">
+          <Fractal 
+            id="parent-fractal" 
+            props={{ 
+              title: "Advanced Fractal Orchestration"
+            }}
+            fallback={<div style={{ padding: '40px', textAlign: 'center' }}>Loading parent fractal...</div>}
+          />
+        </div>
+      </Section>
 
       <style jsx>{`
         main {

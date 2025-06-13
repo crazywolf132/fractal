@@ -26,9 +26,11 @@ export default function Home() {
       <h1>Fractal Demo</h1>
       <p>This app demonstrates the fractal module federation system.</p>
       
-      <Link href="/compose" className="jsx-2f2aff2535b73bf6 cta">
-        Component Composition Demo →
-      </Link>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <Link href="/compose" className="jsx-2f2aff2535b73bf6 cta">
+          Component Composition Demo →
+        </Link>
+      </div>
       
       <h2>Remote Fractal Components</h2>
       

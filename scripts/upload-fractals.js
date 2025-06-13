@@ -8,7 +8,9 @@ const fractals = [
   { id: 'card-fractal', path: 'examples/fractal-app/components/Card.tsx' },
   { id: 'styled-card-fractal', path: 'examples/fractal-app/components/StyledCard.tsx' },
   { id: 'navigation-fractal', path: 'examples/fractal-app/components/Navigation.tsx' },
-  { id: 'navigation-demo-fractal', path: 'examples/fractal-app/components/NavigationDemo.tsx' }
+  { id: 'navigation-demo-fractal', path: 'examples/fractal-app/components/NavigationDemo.tsx' },
+  { id: 'nested-demo-fractal', path: 'examples/fractal-app/components/NestedDemo.jsx' },
+  { id: 'parent-fractal', path: 'examples/fractal-app/components/ParentFractal.jsx' }
 ];
 
 async function uploadFractal(id, filePath) {
