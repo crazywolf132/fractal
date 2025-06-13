@@ -6,17 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "clean": "rimraf .next node_modules",
+    "build:fractals": "fractal build -o ./dist/fractals --registry http://localhost:3001",
+    "watch:fractals": "fractal build -o ./dist/fractals --watch --registry http://localhost:3001",
+    "clean": "rimraf .next node_modules dist",
     "test": "echo \"No tests yet\""
   },
   "dependencies": {
     "@fractal/core": "workspace:*",
-    "@fractal/plugin": "workspace:*",
     "next": "^15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@fractal/cli": "workspace:*",
     "@types/node": "^24.0.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

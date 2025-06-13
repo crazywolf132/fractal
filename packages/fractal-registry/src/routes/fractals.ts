@@ -62,6 +62,14 @@ fractalRouter.get('/:id/manifest', async (c) => {
 });
 
 fractalRouter.post('/:id', async (c) => {
+  // Disable uploads in production for security
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowUploads = process.env.FRACTAL_ALLOW_UPLOADS === 'true';
+  
+  if (isProduction && !allowUploads) {
+    return c.json({ error: 'Uploads disabled in production' }, 403);
+  }
+
   const id = c.req.param('id');
   const body = await c.req.json();
   const { source, manifest } = body;

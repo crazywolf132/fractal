@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm:dev:*\" --names \"CORE,PLUGIN,REGISTRY,APP,CLI\" --prefix-colors \"blue,green,yellow,magenta,cyan\"",
+    "dev": "concurrently \"pnpm:dev:*\" --names \"CORE,REGISTRY,APP,CLI\" --prefix-colors \"blue,yellow,magenta,cyan\"",
     "dev:core": "pnpm --filter @fractal/core dev",
-    "dev:plugin": "pnpm --filter @fractal/plugin dev",
     "dev:registry": "pnpm --filter @fractal/registry dev",
     "dev:app": "wait-on http://localhost:3001/health && pnpm --filter fractal-demo-app dev",
     "dev:cli": "pnpm --filter @fractal/cli dev",
