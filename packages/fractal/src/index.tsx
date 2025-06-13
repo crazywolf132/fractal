@@ -72,7 +72,16 @@ async function loadModule(url: string): Promise<any> {
   (window as any).react = React;
   
   try {
-    return eval(code);
+    // The fractal code is already wrapped in an IIFE that returns module.exports
+    // We use Function constructor to avoid using eval
+    // The code expects window.React to be available
+    const moduleFunction = new Function('window', 'React', `
+      // Make window the global context for the fractal code
+      with (window) {
+        return ${code};
+      }
+    `);
+    return moduleFunction(window, React);
   } finally {
     delete (window as any).React;
     delete (window as any).react;

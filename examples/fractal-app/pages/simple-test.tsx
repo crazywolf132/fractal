@@ -23,12 +23,13 @@ export default function SimpleTest() {
         (window as any).React = await import('react');
         
         try {
-          const moduleExports = eval(code);
+          const moduleFunction = new Function('window', 'React', 'return ' + code);
+          const moduleExports = moduleFunction(window, (window as any).React);
           console.log('Module exports:', moduleExports);
           setStatus('Success! Check console for module exports');
         } catch (evalErr) {
           setError(evalErr);
-          setStatus('Eval error');
+          setStatus('Function execution error');
         }
       } catch (err) {
         setError(err);
