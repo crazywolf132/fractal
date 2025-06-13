@@ -1,6 +1,6 @@
 # Fractal
 
-Fractal is a powerful module federation system that enables sharing and dynamic loading of React components across applications. It provides a complete ecosystem for building, distributing, and consuming modular React components with rich metadata and dependency tracking.
+Fractal is a powerful system that enables sharing and dynamic loading of React components across applications. It provides a complete ecosystem for building, distributing, and consuming modular React components with rich metadata and dependency tracking.
 
 ## 🚀 What are Fractals?
 
@@ -10,15 +10,17 @@ Fractal is a powerful module federation system that enables sharing and dynamic 
 - Shared across multiple applications
 - Tracked with comprehensive metadata including dependencies, repository info, and versioning
 
-Think of fractals as "micro-frontends at the component level" - they enable true component-level modularity and reuse.
+Think of fractals as micro-frontends at the component level - they enable true component-level modularity and reuse across different applications without the complexity of traditional build-time dependencies.
 
 ## 🏗️ Architecture
 
-The Fractal system consists of four main packages:
+The Fractal system consists of three main packages:
 
 - **[@fractal/core](./packages/fractal)** - Runtime component loader and React integration
 - **[@fractal/cli](./packages/fractal-cli)** - Build tool for compiling and distributing fractals
 - **[@fractal/registry](./packages/fractal-registry)** - HTTP API for serving fractal components and metadata
+
+Plus an example application:
 - **[fractal-demo-app](./examples/fractal-app)** - Example Next.js app demonstrating fractal usage
 
 ## 🎯 Key Features
@@ -48,7 +50,7 @@ npm install -g pnpm
 ```bash
 # Clone and install dependencies
 git clone <repository>
-cd mod-fed-next
+cd fractal
 pnpm install
 
 # Build all packages
@@ -154,8 +156,7 @@ function MyApp() {
           onClick: () => alert('Fractal clicked!'),
           variant: "primary"
         }}
-        loading={<div>Loading button...</div>}
-        error={<div>Failed to load button</div>}
+        fallback={<div>Loading button...</div>}
       />
 
       {/* Load multiple fractals */}
@@ -327,6 +328,21 @@ Visit the demo pages:
 - http://localhost:3000/compose - Component composition examples
 - http://localhost:3000/debug - Development debugging tools
 
+## 🧪 Testing
+
+The fractal core package includes comprehensive test coverage:
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage report
+pnpm test:coverage
+```
+
 ## 🧹 Maintenance Commands
 
 ```bash
@@ -335,9 +351,6 @@ pnpm clean
 
 # Clean and reinstall dependencies
 pnpm clean && pnpm install
-
-# Run tests (when available)
-pnpm test
 
 # Check workspace health
 pnpm build    # Should build all packages successfully

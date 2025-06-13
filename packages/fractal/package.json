@@ -1,7 +1,7 @@
 {
   "name": "@fractal/core",
   "version": "0.1.0",
-  "description": "Zero-config module federation for Next.js and React",
+  "description": "Zero-config dynamic component loading for Next.js and React",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
