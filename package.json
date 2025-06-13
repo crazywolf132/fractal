@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm:dev:*\" --names \"CORE,PLUGIN,REGISTRY,APP\" --prefix-colors \"blue,green,yellow,magenta\"",
+    "dev": "concurrently \"pnpm:dev:*\" --names \"CORE,PLUGIN,REGISTRY,APP,CLI\" --prefix-colors \"blue,green,yellow,magenta,cyan\"",
     "dev:core": "pnpm --filter @fractal/core dev",
     "dev:plugin": "pnpm --filter @fractal/plugin dev",
     "dev:registry": "pnpm --filter @fractal/registry dev",
     "dev:app": "wait-on http://localhost:3001/health && pnpm --filter fractal-demo-app dev",
+    "dev:cli": "pnpm --filter @fractal/cli dev",
     "build": "pnpm build:packages && pnpm build:apps",
     "build:packages": "pnpm --filter \"./packages/**\" build",
     "build:apps": "pnpm --filter \"./examples/**\" build",
